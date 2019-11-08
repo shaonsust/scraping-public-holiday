@@ -7,12 +7,14 @@ import json
 
 def publicHoliday():
     result = {}
+
+    # Taking all country name and its html page
     countries, countryPages = countryList()
 
     for i in range(len(countryPages)):
         data = {}
 
-        # Define array
+        # Getting 15 years data 
         for year in range(2015, 2030):
             # Set the url for scraping data
             url = "https://www.qppstudio.net/publicholidays" + str(year) + "/" + str(countryPages[i])
@@ -45,8 +47,7 @@ def publicHoliday():
             print("Scraping country and year : " + str(countries[i]) + " and " + str(year))
 
         result[countries[i]] = data
-    # See data
-    # print(json.dumps(result, sort_keys=True, indent=4))
+
     print("Complete.....")
 
     # Write json data into a json file
@@ -65,7 +66,7 @@ def countryList():
     # Find all option here
     options = soup.find("select").findAll("option")
 
-    # Declare an array for put country name
+    # Declare an array for putting country name and html pages name
     countryList = []
     linkList = []
 
