@@ -77,4 +77,11 @@ def countryList():
 
     return [countryList, linkList]
 
+def getCountryListInJsonFile():
+    countries = countryList()
+
+    with open('country_list.json', 'w') as f:
+        json.dump(countries[0], f, ensure_ascii=False, indent=4)
+
 publicHoliday()
+getCountryListInJsonFile()
