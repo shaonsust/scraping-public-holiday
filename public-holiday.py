@@ -5,6 +5,12 @@ import array
 import re
 import json
 
+def getContent(url):
+    response = requests.get(url)
+    soup = BeautifulSoup(response.content, 'html.parser')
+
+    return soup
+
 def publicHoliday():
     result = {}
 
@@ -15,37 +21,44 @@ def publicHoliday():
         data = {}
 
         # Getting 15 years data 
-        for year in range(2015, 2030):
+        for year in range(2017, 2026):
             # Set the url for scraping data
-            url = "https://www.qppstudio.net/publicholidays" + str(year) + "/" + str(countryPages[i])
-
-            # Connect to the url
-            response = requests.get(url)
+            url = "https://www.timeanddate.com" + str(countryPages[i] + str(year))
 
             # Parse HTML and save BeautifulSoap object
-            soup = BeautifulSoup(response.content, 'html.parser')
+            soup = getContent(url)
 
             # Find table
-            table = soup.find('table')
+            table = soup.find('table', {'id' : 'holidays-table'})
+            if table is None:
+                continue
 
             # Find all tr
-            trs = soup.findAll('tr')
+            trs = table.find('tbody').findAll('tr')
             temp = []
 
             # Find all td from trs
             for tr in trs:
-                tds = tr.findAll('td')
                 item = []
+                th = tr.find('th')
+                if th is not None:
+                    item.append(th.text.encode('utf-8'))
+            
+                # continue
+                tds = tr.findAll('td')
+
                 for td in tds:
                     # data[contry][year].append(td.text)
-                    text = re.sub('[^A-Za-z0-9()]+', ' ', td.text)
+                    text = re.sub('[^A-Za-z0-9()'']+', ' ', td.text.encode('utf-8'))
                     item.append(text)
-                temp.append(item)
+
+                if len(item) > 0:
+                    temp.append(item)
 
             # Assign data 
             data[year] = temp
             print("Scraping country and year : " + str(countries[i]) + " and " + str(year))
-
+                                                     
         result[countries[i]] = data
 
     print("Complete.....")
@@ -55,25 +68,20 @@ def publicHoliday():
         json.dump(result, f, ensure_ascii=False, indent=4)
 
 def countryList():
-    # Open country.html file and get its source code
-    f = open('country.html', 'r')
-    html = f.read()
-    f.close()
+    html = getContent('https://www.timeanddate.com/holidays/')
 
-    # Make soup object from html string
-    soup = BeautifulSoup(html, 'html.parser')
-
-    # Find all option here
-    options = soup.find("select").findAll("option")
+    uls = html.findAll("ul", {'class': 'category-list__list'})
 
     # Declare an array for putting country name and html pages name
     countryList = []
     linkList = []
 
     # Extracting contry name from options
-    for option in options:
-        countryList.append(option.text.strip())
-        linkList.append(option.attrs.get('value'))
+    for ul in uls:
+        anchors = ul.findAll('a')
+        for a in anchors:
+            countryList.append(a.text.strip().encode('utf-8'))
+            linkList.append(a.attrs.get('href'))
 
     return [countryList, linkList]
 
