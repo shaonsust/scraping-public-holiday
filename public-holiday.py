@@ -20,8 +20,8 @@ def publicHoliday():
     for i in range(len(countryPages)):
         data = {}
 
-        # Getting 15 years data 
-        for year in range(2017, 2026):
+        # Getting 6 years data 
+        for year in range(2017, 2023):
             # Set the url for scraping data
             url = "https://www.timeanddate.com" + str(countryPages[i] + str(year))
 
@@ -51,6 +51,13 @@ def publicHoliday():
                     # data[contry][year].append(td.text)
                     text = re.sub('[^A-Za-z0-9()'']+', ' ', td.text.encode('utf-8'))
                     item.append(text)
+
+                # Find and get description of holiday url
+                a = tr.find('a')
+                if a is not None:
+                    thref = a.attrs.get('href')
+                    href = 'https://www.timeanddate.com' + thref
+                    item.append(href)
 
                 if len(item) > 0:
                     temp.append(item)
