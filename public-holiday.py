@@ -56,7 +56,7 @@ def publicHoliday():
                     # data[contry][year].append(td.text)
                     # text = td.text
                     
-                    text = re.sub('[^A-Za-z0-9()'']+', ' ', td.text.encode('utf-8'))
+                    text = re.sub('[^A-Za-z0-9()''\']+', ' ', td.text.encode('utf-8'))
                     if len(text) > 0 :
                         item.append(text)
                     else:
