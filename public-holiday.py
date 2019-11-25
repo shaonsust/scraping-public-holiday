@@ -6,8 +6,9 @@ import re
 import json
 
 def getContent(url):
-    response = requests.get(url)
-    soup = BeautifulSoup(response.content, 'html.parser')
+    headers = {"Accept-Language": "en-US,en;q=0.5"}
+    html = requests.get(url, headers=headers)
+    soup = BeautifulSoup(html.content, 'html.parser')
 
     return soup
 
@@ -40,27 +41,47 @@ def publicHoliday():
             # Find all td from trs
             for tr in trs:
                 item = []
+                dic = {}
                 th = tr.find('th')
-                if th is not None:
-                    item.append(th.text.encode('utf-8'))
+                
+                if th is None:
+                    continue
+                
+                item.append(th.text.encode('utf-8'))
             
                 # continue
                 tds = tr.findAll('td')
 
                 for td in tds:
                     # data[contry][year].append(td.text)
+                    # text = td.text
+                    
                     text = re.sub('[^A-Za-z0-9()'']+', ' ', td.text.encode('utf-8'))
-                    item.append(text)
+                    if len(text) > 0 :
+                        item.append(text)
+                    else:
+                        item.append('')
 
                 # Find and get description of holiday url
+                if len(item) == 4:
+                    item.append('')
+                        
                 a = tr.find('a')
                 if a is not None:
                     thref = a.attrs.get('href')
                     href = 'https://www.timeanddate.com' + thref
                     item.append(href)
-
-                if len(item) > 0:
-                    temp.append(item)
+                else:
+                    item.append('')
+        
+                if len(item) == 6:
+                    dic['day'] = item[0]
+                    dic['weekDay'] = item[1]
+                    dic['name'] = item[2]
+                    dic['type'] = item[3]
+                    dic['location'] = item[4]
+                    dic['detailsURL'] = item[5]
+                    temp.append(dic)
 
             # Assign data 
             data[year] = temp
