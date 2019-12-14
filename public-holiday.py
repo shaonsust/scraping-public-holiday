@@ -1,7 +1,7 @@
 import requests
 import html5lib
 from bs4 import BeautifulSoup
-import array
+from datetime import datetime
 import re
 import json
 
@@ -13,6 +13,7 @@ def getContent(url):
 
 def publicHoliday():
     result = {}
+    date_format = '%d %b %Y'
 
     # Taking all country name and its html page
     countries, countryPages = countryList()
@@ -27,7 +28,7 @@ def publicHoliday():
 
             # Parse HTML and save BeautifulSoap object
             soup = getContent(url)
-
+            
             # Find table
             table = soup.find('table', {'id' : 'holidays-table'})
             if table is None:
@@ -42,7 +43,9 @@ def publicHoliday():
                 item = []
                 th = tr.find('th')
                 if th is not None:
-                    item.append(th.text.encode('utf-8'))
+                    str_date = th.text.encode('utf-8') + ' ' + str(year)
+                    date_obj = datetime.strptime(str_date, date_format)
+                    item.append(date_obj.strftime('%Y-%m-%d %H:%M:S'))
             
                 # continue
                 tds = tr.findAll('td')
@@ -99,4 +102,4 @@ def getCountryListInJsonFile():
         json.dump(countries[0], f, ensure_ascii=False, indent=4)
 
 publicHoliday()
-getCountryListInJsonFile()
+# getCountryListInJsonFile()
